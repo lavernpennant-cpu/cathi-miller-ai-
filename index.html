@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -924,6 +925,433 @@ footer {
     </div>
   </div>
 </footer>
+
+<!-- ===== CHAT WIDGET — INSERT THIS RIGHT BEFORE </body> ===== -->
+<!-- Floating gold bubble + expandable chat panel for Cathi Miller AI Agent -->
+
+<style>
+  /* Chat Widget Container */
+  #cathi-chat-widget {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    font-family: 'Inter', -apple-system, sans-serif;
+  }
+
+  /* Floating Gold Bubble Button */
+  #cathi-chat-bubble {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #C9A961 0%, #E8D8A8 100%);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(45, 20, 68, 0.35), 0 2px 6px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+  }
+
+  #cathi-chat-bubble:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 32px rgba(45, 20, 68, 0.45), 0 4px 8px rgba(0,0,0,0.2);
+  }
+
+  #cathi-chat-bubble svg {
+    width: 28px;
+    height: 28px;
+    fill: #2D1444;
+  }
+
+  /* Pulse ring around bubble */
+  #cathi-chat-bubble::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid rgba(201, 169, 97, 0.5);
+    animation: cathi-pulse 2.5s ease-out infinite;
+  }
+
+  @keyframes cathi-pulse {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.4); opacity: 0; }
+  }
+
+  /* Chat Panel */
+  #cathi-chat-panel {
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    width: 380px;
+    max-width: calc(100vw - 48px);
+    height: 560px;
+    max-height: calc(100vh - 120px);
+    background: #FAF7F2;
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(45, 20, 68, 0.4), 0 4px 12px rgba(0,0,0,0.15);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(201, 169, 97, 0.3);
+  }
+
+  #cathi-chat-panel.open {
+    display: flex;
+    animation: cathi-slide-up 0.3s ease-out;
+  }
+
+  @keyframes cathi-slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Chat Header */
+  #cathi-chat-header {
+    background: linear-gradient(135deg, #2D1444 0%, #3D1A5E 100%);
+    color: #FAF7F2;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  #cathi-chat-header-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  #cathi-chat-header-subtitle {
+    font-size: 11px;
+    color: #E8D8A8;
+    font-weight: 400;
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+  }
+
+  #cathi-chat-close {
+    background: none;
+    border: none;
+    color: #FAF7F2;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: background 0.2s;
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  #cathi-chat-close:hover {
+    background: rgba(255,255,255,0.1);
+  }
+
+  /* Messages Area */
+  #cathi-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #FAF7F2;
+  }
+
+  .cathi-msg {
+    max-width: 80%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-wrap: break-word;
+  }
+
+  .cathi-msg.assistant {
+    background: #FFFFFF;
+    color: #1A1A1A;
+    align-self: flex-start;
+    border: 1px solid rgba(201, 169, 97, 0.25);
+    border-bottom-left-radius: 4px;
+  }
+
+  .cathi-msg.user {
+    background: linear-gradient(135deg, #3D1A5E 0%, #5B2C87 100%);
+    color: #FAF7F2;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+
+  .cathi-msg.error {
+    background: #FEF2F2;
+    color: #991B1B;
+    align-self: center;
+    border: 1px solid #FCA5A5;
+    font-size: 13px;
+    text-align: center;
+  }
+
+  /* Typing indicator */
+  .cathi-typing {
+    align-self: flex-start;
+    background: #FFFFFF;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(201, 169, 97, 0.25);
+    border-bottom-left-radius: 4px;
+    display: flex;
+    gap: 4px;
+  }
+
+  .cathi-typing span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #C9A961;
+    animation: cathi-bounce 1.4s infinite ease-in-out;
+  }
+
+  .cathi-typing span:nth-child(2) { animation-delay: 0.2s; }
+  .cathi-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes cathi-bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* Input Area */
+  #cathi-chat-input-area {
+    padding: 12px;
+    background: #FFFFFF;
+    border-top: 1px solid rgba(201, 169, 97, 0.25);
+    display: flex;
+    gap: 8px;
+  }
+
+  #cathi-chat-input {
+    flex: 1;
+    border: 1px solid rgba(201, 169, 97, 0.4);
+    border-radius: 22px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+    background: #FAF7F2;
+    color: #1A1A1A;
+  }
+
+  #cathi-chat-input:focus {
+    border-color: #C9A961;
+    background: #FFFFFF;
+  }
+
+  #cathi-chat-send {
+    background: linear-gradient(135deg, #C9A961 0%, #E8D8A8 100%);
+    color: #2D1444;
+    border: none;
+    border-radius: 22px;
+    padding: 0 18px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    transition: transform 0.1s, opacity 0.2s;
+    font-family: inherit;
+  }
+
+  #cathi-chat-send:hover:not(:disabled) {
+    transform: scale(1.03);
+  }
+
+  #cathi-chat-send:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Footer */
+  #cathi-chat-footer {
+    padding: 8px 12px;
+    background: #FFFFFF;
+    border-top: 1px solid rgba(201, 169, 97, 0.15);
+    text-align: center;
+    font-size: 10px;
+    color: #6B6B6B;
+    letter-spacing: 0.3px;
+  }
+
+  /* Mobile */
+  @media (max-width: 480px) {
+    #cathi-chat-widget {
+      bottom: 16px;
+      right: 16px;
+    }
+    #cathi-chat-panel {
+      width: calc(100vw - 32px);
+      height: calc(100vh - 100px);
+      bottom: 76px;
+      right: 0;
+    }
+  }
+</style>
+
+<div id="cathi-chat-widget">
+  <!-- Chat Panel (hidden by default) -->
+  <div id="cathi-chat-panel">
+    <div id="cathi-chat-header">
+      <div>
+        <div id="cathi-chat-header-title">The Purple Girl Realtor®</div>
+        <div id="cathi-chat-header-subtitle">CATHI'S 24/7 ASSISTANT</div>
+      </div>
+      <button id="cathi-chat-close" aria-label="Close chat">×</button>
+    </div>
+    <div id="cathi-chat-messages"></div>
+    <div id="cathi-chat-input-area">
+      <input
+        id="cathi-chat-input"
+        type="text"
+        placeholder="Ask anything..."
+        autocomplete="off"
+      />
+      <button id="cathi-chat-send">Send</button>
+    </div>
+    <div id="cathi-chat-footer">
+      Powered by Lavern Pennant · Confidential
+    </div>
+  </div>
+
+  <!-- Floating Gold Bubble -->
+  <button id="cathi-chat-bubble" aria-label="Open chat with Cathi's AI assistant">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+    </svg>
+  </button>
+</div>
+
+<script>
+(function() {
+  const bubble = document.getElementById('cathi-chat-bubble');
+  const panel = document.getElementById('cathi-chat-panel');
+  const closeBtn = document.getElementById('cathi-chat-close');
+  const messagesEl = document.getElementById('cathi-chat-messages');
+  const input = document.getElementById('cathi-chat-input');
+  const sendBtn = document.getElementById('cathi-chat-send');
+
+  let conversationHistory = [];
+  let isOpen = false;
+  let isWaiting = false;
+
+  function openChat() {
+    panel.classList.add('open');
+    isOpen = true;
+    if (conversationHistory.length === 0) {
+      showGreeting();
+    }
+    setTimeout(() => input.focus(), 300);
+  }
+
+  function closeChat() {
+    panel.classList.remove('open');
+    isOpen = false;
+  }
+
+  function showGreeting() {
+    addMessage(
+      "Hi there! I'm Cathi's assistant — she's an Associate Broker with 38+ years of experience helping families across MD, VA, PA, and DC. How can I help you today?",
+      'assistant'
+    );
+  }
+
+  function addMessage(text, role) {
+    const msg = document.createElement('div');
+    msg.className = 'cathi-msg ' + role;
+    msg.textContent = text;
+    messagesEl.appendChild(msg);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    if (role === 'user' || role === 'assistant') {
+      conversationHistory.push({ role: role, content: text });
+    }
+  }
+
+  function showTyping() {
+    const typing = document.createElement('div');
+    typing.className = 'cathi-typing';
+    typing.id = 'cathi-typing-indicator';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    messagesEl.appendChild(typing);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function hideTyping() {
+    const typing = document.getElementById('cathi-typing-indicator');
+    if (typing) typing.remove();
+  }
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text || isWaiting) return;
+
+    isWaiting = true;
+    sendBtn.disabled = true;
+    input.value = '';
+    addMessage(text, 'user');
+    showTyping();
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: conversationHistory }),
+      });
+
+      hideTyping();
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        addMessage(
+          errData.error || "I'm having trouble connecting right now. Please call Cathi directly or try again in a moment.",
+          'error'
+        );
+        return;
+      }
+
+      const data = await response.json();
+      addMessage(data.reply, 'assistant');
+
+    } catch (error) {
+      hideTyping();
+      addMessage(
+        "Connection issue — please try again, or contact Cathi directly.",
+        'error'
+      );
+    } finally {
+      isWaiting = false;
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  }
+
+  bubble.addEventListener('click', () => {
+    isOpen ? closeChat() : openChat();
+  });
+
+  closeBtn.addEventListener('click', closeChat);
+  sendBtn.addEventListener('click', sendMessage);
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+})();
+</script>
+
+<!-- ===== END CHAT WIDGET ===== -->
+
 
 </body>
 </html>
